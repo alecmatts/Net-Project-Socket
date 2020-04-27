@@ -1,5 +1,6 @@
 import socket
 import threading
+import sys
 
 # constant values
 PORT = 5050
@@ -10,16 +11,20 @@ HEADER = 64
 FORMAT = "utf-8"
 DISCONNECT_MSG = "!"
 
+def create_socket():
+    func_status = 1
+    try:
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.bind(ADDR)
+    except socket.error as msg:
+        print(str(msg) + "\n")
+        func_status = 0
+    finally:
+        return func_status, server
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-server.bind(ADDR)
-
-def start():
+def start(server):
     server.listen()
-    print(socket.SOMAXCONN)
     print(f"[LISTENING] Server is listening on {HOST}\n")
 
     while True:
@@ -38,12 +43,17 @@ def handle_client(conn, addr):
             msg = conn.recv(msg_length).decode(FORMAT)
 
             if msg == DISCONNECT_MSG:
-                print(f"Client {addr} is disconnecting.\n")
+                print(f"[DISCONNECTED] Client {addr} has gone offline.\n")
                 break
 
             print(f"[RECEIVED DATA] {addr} : {msg}\n")
 
     conn.close()
 
-print("[STARTING] Server is starting...\n")
-start()
+def main():
+    func_status, server = create_socket()
+    if func_status:
+        print("[STARTING] Server is starting...\n")
+        start(server)
+    else:
+        print("[SHUTTING DOWN] Closing application due to create socket error...")
