@@ -2,7 +2,7 @@ import client
 import server
 
 while True:
-    user_type = input("Are you a client or a server? (server/client/!)    ")
+    user_type = input("Are you a client or a server? (server/client/!)\n> ")
 
     if user_type == "server":
         print("     Starting as the SERVER.\n")

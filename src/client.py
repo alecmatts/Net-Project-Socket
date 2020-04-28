@@ -37,12 +37,16 @@ def send_msg(client, msg):
     return send_status
 
 def handle_server(client):
-        msg_length = client.recv(HEADER).decode(FORMAT)
-        if msg_length:
-            msg_length = int(msg_length)
+    msg_length = client.recv(HEADER).decode(FORMAT)
+    if msg_length:
+        msg_length = int(msg_length)
+        try:
             msg = client.recv(msg_length).decode(FORMAT)
-
-            print(f"[RECEIVED DATA] Server: {msg}\n")
+        except socket.error as error_msg:
+            print(str(error_msg) + "\n")
+            return 0     
+        print(msg)
+        return 1
 
 
 def main():
@@ -58,7 +62,8 @@ def main():
             if msg == DISCONNECT_MSG:
                 break
 
-            handle_server(client)
+            if not handle_server(client):
+                break
 
         print("[DISCONNECT] Client is disconnecting from server.")
         client.close()
