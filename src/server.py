@@ -48,7 +48,28 @@ def handle_client(conn, addr):
 
             print(f"[RECEIVED DATA] {addr} : {msg}\n")
 
+            if send_msg(conn, "Ok. I have received your request.") == 0:
+                print("Can not send ACK to client.\n")
+
     conn.close()
+
+def send_msg(conn, msg):
+    message = msg.encode(FORMAT)
+
+    msg_length = len(message)
+    msg_length = str(msg_length).encode(FORMAT)
+    msg_length += b' ' * (HEADER - len(msg_length))
+
+    send_status = 1
+    try:
+        conn.sendall(msg_length)
+        conn.sendall(message)
+    except socket.error as msg:
+        print(str(msg) + "\n")
+        send_status = 0
+    
+    return send_status
+
 
 def main():
     func_status, server = create_socket()
