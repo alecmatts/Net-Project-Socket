@@ -52,7 +52,7 @@ def handle_server(client):
 def main():
     func_status, client = create_socket()
     if func_status:
-        print(f"[CONNECTED] Client has connected to server at port {PORT}\n")
+        print(f"[CONNECTED] Client has connected to server at port {PORT}.\n")
 
         while True:
             msg = input("> ")
