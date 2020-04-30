@@ -3,3 +3,11 @@
 src/__pycache__/
 
 src/crawl_data/db/
+
+src/crawl_data/crawl_data/__pycache__/
+
+src/crawl_data/crawl_data/spiders/__pycache__/
+
+src/db/
+
+src/temp_log.txt

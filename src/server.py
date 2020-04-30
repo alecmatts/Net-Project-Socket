@@ -3,10 +3,7 @@ import threading
 import sys
 import json
 import unidecode
-
-# testing
-import time
-import random
+import subprocess
 
 # constant values
 PORT = 5050
@@ -242,7 +239,15 @@ def handle_request(msg, province_list, data_list, reward_value):
     return NOT_SUPPORT
 
 def main():
+    print("[UPDATING] Database is being updated...\n")
+
+    with open("temp_log.txt", "a") as f:
+        crawl = subprocess.run("del crawl_data\\db\\xsmb.json crawl_data\\db\\xsmt.json crawl_data\\db\\xsmn.json && cd crawl_data && scrapy crawl", stdout=f, stderr=f, text=True, shell=True)
+
+    print("[LOADING] Loading database to serve...\n")
     province_list, data_list, reward_value = launch_db()
+
+    print("[DONE] Data is loaded.\n")
 
     func_status, server = create_socket()
     if func_status:
