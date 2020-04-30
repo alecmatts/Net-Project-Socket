@@ -55,7 +55,12 @@ def main():
         print(f"[CONNECTED] Client has connected to server at port {PORT}.\n")
 
         while True:
-            msg = input("> ")
+            try:
+                msg = input("> ")
+            except KeyboardInterrupt as error_msg:
+                print("\n[INTERRUPTED] Detected KeyboardInterrupt. Force closing application.\n")
+                msg = DISCONNECT_MSG
+
             if send_msg(client, msg) == 0:
                 break
 
