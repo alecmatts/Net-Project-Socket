@@ -1,6 +1,5 @@
 import socket
 import threading
-import sys
 import json
 import unidecode
 import subprocess

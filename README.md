@@ -28,7 +28,6 @@
   * Sau khi người dùng gửi truy vấn thì kết quả trả về của truy vấn đó phải được gửi lại đầy đủ, tránh mất mát thông tin
   * Người dùng phải thiết lập kết nối trước khi được server phục vụ
 
-* Hình ảnh minh họa
 
 ![Lập trình socket trên Linux - Embedded247](https://sites.google.com/site/embedded247/_/rsrc/1346224832484/npcourse/lap-trinh-c-socket/sockttcp.jpg)
 
@@ -51,7 +50,18 @@
 
 #### Giao thức truyền nhận tin
 
+Vì khi truyền nhận dữ liệu giữa server - client, ta phải định nghĩa độ dài tin nhắn được nhận nên trong chương trình này có giao thức truyền tin riêng
+
+* Khi tin nhắn được chuyển đi
+  * Xử lí tin nhắn của người gửi thành 1 package gồm 2 phần: header và tin nhắn. Trong đó, header có độ dài là 64 bytes, chứa thông tin về độ dài của tin nhắn sắp tới
+
+* Khi tin nhắn được nhận, mở header để biết độ dài tin nhắn sắp tới rồi nhận tin nhắn với độ dài đó 
+
 #### Crawl data từ web
+
+* Hỗ trợ việc crawl dữ liệu một lần duy nhất từ web https://xskt.com.vn/ trong vòng đời chương trình khi server được khởi động
+* Crawl theo từng vùng (Bắc / Trung / Nam) và lấy 7 ngày gần nhất có xổ số của tỉnh đó vì trong 7 ngày  thì tất cả các tỉnh đều được xổ ít nhất một lần
+* Sử dụng thư viện [scrapy](https://docs.scrapy.org/en/latest/)
 
 #### server.py
 
@@ -86,15 +96,42 @@
 
 ### Kịch bản chương trình
 
-* Chạy file ``main.py``, kết nối với tư cách là server hoặc client (chỉ có 1 server duy nhất và server phải tồn tại trước thì client mới có thể kết nối vào được)
+* Chạy file ``main.py``, kết nối với tư cách là server hoặc client
+
+  * Server: Tạo socket $\rightarrow$ Crawl dữ liệu về database $\rightarrow$ Load dữ liệu lên để phục vụ $\rightarrow$ Lắng nghe các kết nối
+
+  * Client sẽ tạo socket $\rightarrow$ Kết nối đến server 
+
+    $\rightarrow$ Server chấp nhận kết nối của client
+
 * Client gửi truy vấn đến server
+
 * Server xử lí truy vấn $\rightarrow$ kết quả
+
 * Server gửi kết quả cho client
+
 * Client nhận kết quả
+
 * Client chọn tiếp tục truy vấn hoặc ngắt kết nối với server
 
 ### Cách chạy chương trình
 
-Tại folder ``../src``
+<u>Lưu ý:</u> Nên chạy ở *môi trường ảo* của python
 
-* Tạo virtual environment
+Giả sử lệnh chạy python trên máy là ``python`` ở phiên bản 3.x. Tại folder ``../18127185``
+
+* Install những thư viện cần thiết
+
+  ``pip install -r dist/requirements.txt``
+
+* Chuyển đến thư mục chứa src
+
+  ``cd src``
+
+* Chạy chương trình
+
+  ``python main.py``
+
+* Chọn kết nối là client hay server (Chỉ có 1 server duy nhất và server phải tồn tại trước thì client mới có thể kết nối vào được)
+
+* Tại client gửi truy vấn, server sẽ tự động gửi lại kết quả
