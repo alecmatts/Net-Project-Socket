@@ -17,6 +17,8 @@
 |  5   | 30/04/2020 |    Server tự động update data (crawl) khi được khởi động     | :heavy_check_mark: |             |
 |  6   |  1/5/2020  |                         Viết báo cáo                         |                    |             |
 
+<div style="page-break-after: always; break-after: page;"></div>
+
 ## Báo cáo
 
 * Ngôn ngữ lập trình: Python
