@@ -39,7 +39,13 @@ def send_msg(client, msg):
 def handle_server(client):
     msg_length = client.recv(HEADER).decode(FORMAT)
     if msg_length:
-        msg_length = int(msg_length)
+        msg_length = msg_length.strip()
+        if msg_length.isdigit():
+            msg_length = int(msg_length)
+        else:
+            print("[ERROR] Something happened to the server.\n")
+            return 0
+        
         try:
             msg = client.recv(msg_length).decode(FORMAT)
         except socket.error as error_msg:
@@ -47,7 +53,6 @@ def handle_server(client):
             return 0     
         print(msg)
         return 1
-
 
 def main():
     func_status, client = create_socket()

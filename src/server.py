@@ -14,9 +14,12 @@ HEADER = 64
 FORMAT = "utf-8"
 DISCONNECT_MSG = "!"
 
+NON_SERVICE = "[ERROR] Please connect as a client for service.\n"
+
 INSTRUCTION = "[INSTRUCTION]\n1. Xem kết quả xổ số của tỉnh X, gửi truy vấn:\n                <X>           với X là tên tỉnh thành không có dấu, không có khoảng trắng.\n2. Tra sổ số theo số vé Y và tỉnh thành X, gửi truy vấn:\n      <X> <khoảng trắng> <Y>  với X là tên tỉnh thành không có dấu, không có khoảng trắng, Y là số vé của quý khách.\n"
 NOT_SUPPORT = "[NOT SUPPORT] Request is not supported. Please try again.\n"
 NO_PROVINCE = "[NOT FOUND] The province you looking up is not available. Please try again.\n"
+NOT_VALID = "[NOT VALID] Your ticket number is not in the right format. Please try again.\n"
 
 def create_socket():
     func_status = 1
@@ -52,7 +55,14 @@ def handle_client(conn, addr, province_list, data_list, reward_value):
             break
 
         if msg_length:
-            msg_length = int(msg_length)
+            msg_length = msg_length.strip()
+            if msg_length.isdigit():
+                msg_length = int(msg_length)
+            else:
+                if send_msg(conn, NON_SERVICE) == 0:
+                    print("[ERROR] Can not send message to client.\n")
+                break
+
             msg = conn.recv(msg_length).decode(FORMAT)
 
             if msg == DISCONNECT_MSG:
@@ -67,7 +77,7 @@ def handle_client(conn, addr, province_list, data_list, reward_value):
             
             print(f"[DONE] Sending result to client {addr}.\n")
             if send_msg(conn, result) == 0:
-                print("Can not send message to client.\n")
+                print("[ERROR] Can not send message to client.\n")
 
     conn.close()
 
@@ -221,14 +231,17 @@ def handle_request(msg, province_list, data_list, reward_value):
             province, mode = get_province(province_request, province_list)
             if mode == -1:
                 return NO_PROVINCE
+            elif (mode == 0 and len(number_request) != 5) or (mode != 0 and len(number_request) != 6):
+                return NOT_VALID
             else:
                 reward_list = get_reward(province, data_list[mode])
                 for reward in reward_list:
                     reward_name = reward[0]
                     reward.pop(0)
-                    if number_request in reward:
-                        output_string += "Chúc mừng bạn đã trúng " + reward_name + " trị giá " + reward_value[str(mode)][reward_name] + ".\n"
-                        return output_string
+                    for number in reward:
+                        if number_request.rfind(number) == len(number_request) - len(number):
+                            output_string += "Chúc mừng bạn đã trúng " + reward_name + " trị giá " + reward_value[str(mode)][reward_name] + ".\n"
+                            return output_string
                     
                 output_string += "Chúc bạn may mắn lần sau.\n"
                 return output_string
