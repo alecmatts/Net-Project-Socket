@@ -1,4 +1,5 @@
 import socket
+import logging
 
 PORT = 5050
 HOST = socket.gethostbyname(socket.gethostname())
@@ -14,7 +15,7 @@ def create_socket():
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect(ADDR)
     except socket.error as msg:
-        print(str(msg) + "\n")
+        logging.error(str(msg) + "\n")
         func_status = 0
 
     return func_status, client
@@ -31,7 +32,7 @@ def send_msg(client, msg):
         client.sendall(msg_length)
         client.sendall(message)
     except socket.error as msg:
-        print(str(msg) + "\n")
+        logging.error(str(msg) + "\n")
         send_status = 0
     
     return send_status
@@ -43,27 +44,29 @@ def handle_server(client):
         if msg_length.isdigit():
             msg_length = int(msg_length)
         else:
-            print("[ERROR] Something happened to the server.\n")
+            logging.error("[ERROR] Something happened to the server.\n")
             return 0
         
         try:
             msg = client.recv(msg_length).decode(FORMAT)
         except socket.error as error_msg:
-            print(str(error_msg) + "\n")
+            logging.error(str(error_msg) + "\n")
             return 0     
-        print(msg)
+        logging.info(msg)
         return 1
 
 def main():
+    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+
     func_status, client = create_socket()
     if func_status:
-        print(f"[CONNECTED] Client has connected to server at port {PORT}.\n")
+        logging.info(f"[CONNECTED] Client has connected to server at port {PORT}.\n")
 
         while True:
             try:
                 msg = input("> ")
             except KeyboardInterrupt as error_msg:
-                print("\n[INTERRUPTED] Detected KeyboardInterrupt. Force closing application.\n")
+                logging.info("\n[INTERRUPTED] Detected KeyboardInterrupt. Force closing application.\n")
                 msg = DISCONNECT_MSG
 
             if send_msg(client, msg) == 0:
@@ -75,7 +78,7 @@ def main():
             if not handle_server(client):
                 break
 
-        print("[DISCONNECT] Client is disconnecting from server.")
+        logging.info("[DISCONNECT] Client is disconnecting from server.")
         client.close()
     else:
-        print("[SHUTTING DOWN] Closing application due to create socket error...")
+        logging.info("[SHUTTING DOWN] Closing application due to create socket error...")

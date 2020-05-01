@@ -4,6 +4,7 @@ import sys
 import json
 import unidecode
 import subprocess
+import logging
 
 # constant values
 PORT = 5050
@@ -28,30 +29,30 @@ def create_socket():
         #server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server.bind(ADDR)
     except socket.error as msg:
-        print(str(msg) + "\n")
+        logging.error(str(msg) + "\n")
         func_status = 0
     finally:
         return func_status, server
 
 def start(server, province_list, data_list, reward_value):
     server.listen()
-    print(f"[LISTENING] Server is listening on {HOST}.\n")
+    logging.info(f"[LISTENING] Server is listening on {HOST}.\n")
 
     while True:
         conn, addr = server.accept()
         thread = threading.Thread(target=handle_client, args=(conn, addr, province_list, data_list, reward_value))
         thread.start()
-        print(f"[ACTIVE CONNECTION] {threading.activeCount() - 1}.\n")
+        logging.info(f"[ACTIVE CONNECTION] {threading.activeCount() - 1}.\n")
 
 def handle_client(conn, addr, province_list, data_list, reward_value):
-    print(f"[NEW CONNECTION] {addr} connected.")
+    logging.info(f"[NEW CONNECTION] {addr} connected.")
 
     while True:
         try:
             msg_length = conn.recv(HEADER).decode(FORMAT)
         except socket.error as error_msg:
-            print(f"Client {addr} has disconnected.")
-            print("[ERROR]" + str(error_msg) + "\n")
+            logging.info(f"Client {addr} has disconnected.")
+            logging.error("[ERROR]" + str(error_msg) + "\n")
             break
 
         if msg_length:
@@ -60,24 +61,22 @@ def handle_client(conn, addr, province_list, data_list, reward_value):
                 msg_length = int(msg_length)
             else:
                 if send_msg(conn, NON_SERVICE) == 0:
-                    print("[ERROR] Can not send message to client.\n")
+                    logging.error("[ERROR] Can not send message to client.\n")
                 break
 
             msg = conn.recv(msg_length).decode(FORMAT)
 
             if msg == DISCONNECT_MSG:
-                print(f"[DISCONNECTED] Client {addr} has gone offline.\n")
+                logging.info(f"[DISCONNECTED] Client {addr} has gone offline.\n")
                 break
 
-            print(f"[RECEIVED DATA] {addr} : {msg}\n")
-
-            print(f"[PROCESSING] Server is handling request from client {addr}.\n")
+            logging.info(f"[RECEIVED DATA] {addr} : {msg}. \n[PROCESSING] Server is handling request from client {addr}.\n")
 
             result = handle_request(msg, province_list, data_list, reward_value)
             
-            print(f"[DONE] Sending result to client {addr}.\n")
+            logging.info(f"[DONE] Sending result to client {addr}.\n")
             if send_msg(conn, result) == 0:
-                print("[ERROR] Can not send message to client.\n")
+                logging.error("[ERROR] Can not send message to client.\n")
 
     conn.close()
 
@@ -93,7 +92,7 @@ def send_msg(conn, msg):
         conn.sendall(msg_length)
         conn.sendall(message)
     except socket.error as msg:
-        print(str(msg) + "\n")
+        logging.error(str(msg) + "\n")
         send_status = 0
     
     return send_status
@@ -251,22 +250,24 @@ def handle_request(msg, province_list, data_list, reward_value):
     
     return NOT_SUPPORT
 
-def main(): 
+def main():
+    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+
     func_status, server = create_socket()
 
     if func_status:
-        print("[UPDATING] Database is being updated...\n")
+        logging.info("[UPDATING] Database is being updated...\n")
         with open("temp_log.txt", "a") as f:
             crawl = subprocess.run("del crawl_data\\db\\xsmb.json crawl_data\\db\\xsmt.json crawl_data\\db\\xsmn.json && cd crawl_data && scrapy crawl", stdout=f, stderr=f, text=True, shell=True)
 
-        print("[LOADING] Loading database to serve...\n")
+        logging.info("[LOADING] Loading database to serve...\n")
         province_list, data_list, reward_value = launch_db()
 
-        print("[DONE] Data is loaded. Ready to serve.\n")
+        logging.info("[DONE] Data is loaded. Ready to serve.\n")
 
-        print("[STARTING] Server is starting...\n")
+        logging.info("[STARTING] Server is starting...\n")
         start(server, province_list, data_list, reward_value)
     else:
-        print("[SHUTTING DOWN] Closing application due to create socket error...")
+        logging.info("[SHUTTING DOWN] Closing application due to create socket error...")
 
     server.close()
