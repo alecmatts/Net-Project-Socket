@@ -21,8 +21,9 @@
 
 ## Báo cáo
 
-* Ngôn ngữ lập trình: Python
-* IDE/Code editor: Visual Studio Code
+* **Hệ điều hành:** Windows
+* **Ngôn ngữ lập trình:** Python
+* **IDE/Code editor:** Visual Studio Code
 
 ### Giao thức kết nối
 
@@ -120,7 +121,7 @@ Vì khi truyền nhận dữ liệu giữa server - client, ta phải định ng
 
 <u>Lưu ý:</u> Nên chạy ở *môi trường ảo* của python
 
-Giả sử lệnh chạy python trên máy là ``python`` ở phiên bản 3.x. Tại folder ``../18127185``
+Giả sử lệnh chạy python trên máy là ``python`` ở phiên bản 3.x trên Windows. Tại folder ``../18127185``
 
 * Install những thư viện cần thiết
 
@@ -137,3 +138,9 @@ Giả sử lệnh chạy python trên máy là ``python`` ở phiên bản 3.x. 
 * Chọn kết nối là client hay server (Chỉ có 1 server duy nhất và server phải tồn tại trước thì client mới có thể kết nối vào được)
 
 * Tại client gửi truy vấn, server sẽ tự động gửi lại kết quả
+
+#### Giới hạn chương trình
+
+Chương trình chưa hỗ trợ việc tắt hẳn server. Vì ở Windows không thể bắt KeyboardException khi server đang listen được, nên em bỏ qua chức năng này.
+
+Nếu server bị bắt buộc phải ngắt, các thread cũng chết theo vì đã set ``daemon = True`` 

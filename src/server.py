@@ -4,8 +4,14 @@ import json
 import unidecode
 import subprocess
 import logging
+import os
 
 # constant values
+DB_FILE_B = "crawl_data\\db\\xsmb.json"
+DB_FILE_T = "crawl_data\\db\\xsmt.json"
+DB_FILE_N = "crawl_data\\db\\xsmn.json"
+
+
 PORT = 5050
 HOST = socket.gethostbyname(socket.gethostname())
 ADDR = (HOST, PORT)
@@ -40,6 +46,7 @@ def start(server, province_list, data_list, reward_value):
     while True:
         conn, addr = server.accept()
         thread = threading.Thread(target=handle_client, args=(conn, addr, province_list, data_list, reward_value))
+        thread.daemon = True
         thread.start()
         logging.info(f"[ACTIVE CONNECTION] {threading.activeCount() - 1}.\n")
 
@@ -98,7 +105,7 @@ def send_msg(conn, msg):
 
 def launch_db():
     # Data from mien Nam
-    with open('crawl_data/db/xsmn.json') as json_file:
+    with open(DB_FILE_N) as json_file:
         json_data = json_file.read()
 
     data_mn = json.loads(json_data)
@@ -113,7 +120,7 @@ def launch_db():
 
 
     # Data from mien Trung
-    with open('crawl_data/db/xsmt.json') as json_file:
+    with open(DB_FILE_T) as json_file:
         json_data = json_file.read()
 
     data_mt = json.loads(json_data)
@@ -128,7 +135,7 @@ def launch_db():
 
 
     # Data from mien Bac
-    with open('crawl_data/db/xsmb.json') as json_file:
+    with open(DB_FILE_B) as json_file:
         json_data = json_file.read()
 
     data_mb = json.loads(json_data)
@@ -257,7 +264,10 @@ def main():
     if func_status:
         logging.info("[UPDATING] Database is being updated...\n")
         with open("temp_log.txt", "a") as f:
-            crawl = subprocess.run("del crawl_data\\db\\xsmb.json crawl_data\\db\\xsmt.json crawl_data\\db\\xsmn.json && cd crawl_data && scrapy crawl", stdout=f, stderr=f, text=True, shell=True)
+            if os.path.exists(DB_FILE_B): os.remove(DB_FILE_B)
+            if os.path.exists(DB_FILE_T): os.remove(DB_FILE_T)
+            if os.path.exists(DB_FILE_N): os.remove(DB_FILE_N)
+            crawl = subprocess.run("cd crawl_data && scrapy crawl", stdout=f, stderr=f, text=True, shell=True)
 
         logging.info("[LOADING] Loading database to serve...\n")
         province_list, data_list, reward_value = launch_db()
