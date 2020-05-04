@@ -7,9 +7,9 @@ import logging
 import os
 
 # constant values
-DB_FILE_B = "crawl_data\\db\\xsmb.json"
-DB_FILE_T = "crawl_data\\db\\xsmt.json"
-DB_FILE_N = "crawl_data\\db\\xsmn.json"
+DB_FILE_B = "crawl_data/db/xsmb.json"
+DB_FILE_T = "crawl_data/db/xsmt.json"
+DB_FILE_N = "crawl_data/db/xsmn.json"
 
 
 PORT = 5050
@@ -27,6 +27,8 @@ NOT_SUPPORT = "[NOT SUPPORT] Request is not supported. Please try again.\n"
 NO_PROVINCE = "[NOT FOUND] The province you looking up is not available. Please try again.\n"
 NOT_VALID = "[NOT VALID] Your ticket number is not in the right format. Please try again.\n"
 
+threads = []
+
 def create_socket():
     func_status = 1
     try:
@@ -41,14 +43,21 @@ def create_socket():
 
 def start(server, province_list, data_list, reward_value):
     server.listen()
-    logging.info(f"[LISTENING] Server is listening on {HOST}.\n")
+    logging.info(f"[LISTENING] Server is listening on {HOST}.\n")        
 
     while True:
-        conn, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(conn, addr, province_list, data_list, reward_value))
-        thread.daemon = True
-        thread.start()
-        logging.info(f"[ACTIVE CONNECTION] {threading.activeCount() - 1}.\n")
+        try:
+            conn, addr = server.accept()
+            thread = threading.Thread(target=handle_client, args=(conn, addr, province_list, data_list, reward_value))
+            thread.start()
+            threads.append(thread)
+            logging.info(f"[ACTIVE CONNECTION] {threading.activeCount() - 1}.\n")
+        except KeyboardInterrupt:
+            logging.info("\n[INTERRUPTED] Detected KeyboardInterrupt. Application will close when every clients have been disconnected.\n")
+            server.close()
+            for thread in threads:
+                thread.join()
+            break
 
 def handle_client(conn, addr, province_list, data_list, reward_value):
     logging.info(f"[NEW CONNECTION] {addr} connected.")
@@ -279,4 +288,5 @@ def main():
     else:
         logging.info("[SHUTTING DOWN] Closing application due to create socket error...")
 
-    server.close()
+    logging.info("[DONE] Server is closed.")
+    logging.info(f"[ACTIVE CONNECTION] {threading.activeCount() - 1}.\n")
