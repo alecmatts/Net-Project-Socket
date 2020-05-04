@@ -31,9 +31,6 @@
   * Sau khi người dùng gửi truy vấn thì kết quả trả về của truy vấn đó phải được gửi lại đầy đủ, tránh mất mát thông tin
   * Người dùng phải thiết lập kết nối trước khi được server phục vụ
 
-
-![Lập trình socket trên Linux - Embedded247](https://sites.google.com/site/embedded247/_/rsrc/1346224832484/npcourse/lap-trinh-c-socket/sockttcp.jpg)
-
 ### Mô hình bài làm
 
 * Có 3 mô hình xử lí các kết nối: Tuần tự, giả song song, song song.
@@ -46,8 +43,6 @@
   ​														$\Rightarrow$ **Mỗi client là một thread.**
 
 * Multithreading trong python bị giới hạn bởi GLI (Global Interpreter Lock) nên các thread không thể xử lí song song được, nhưng các thread có thể trao quyền sử dụng CPU cho thread khác. Điều này khiến cho tất cả các client nghĩ rằng mình được phục vụ một cách công bằng như nhau. Ngoài ra thread cũng dùng ít tài nguyên hơn process
-
-![image-20200430231917970](C:\Users\Neo\AppData\Roaming\Typora\typora-user-images\image-20200430231917970.png)
 
 ### Mô tả tóm tắt các hàm chính
 
@@ -139,8 +134,6 @@ Giả sử lệnh chạy python trên máy là ``python`` ở phiên bản 3.x t
 
 * Tại client gửi truy vấn, server sẽ tự động gửi lại kết quả
 
-#### Giới hạn chương trình
+#### /////////// chương trình
 
-Chương trình chưa hỗ trợ việc tắt hẳn server. Vì ở Windows không thể bắt KeyboardException khi server đang listen được, nên em bỏ qua chức năng này.
-
-Nếu server bị bắt buộc phải ngắt, các thread cũng chết theo vì đã set ``daemon = True`` 
+Windows không thể bắt KeyboardException khi server đang listen được, nên em bỏ qua chức năng này.
